@@ -14,17 +14,5 @@ namespace SillyWillyHomework.Controllers
         {
             _customersService = customersService;
         }
-
-
-        [HttpGet("{id}/orders")]
-        public async Task<ActionResult<List<OrderDto>>> Get(int id)
-        {
-            var orders = await _customersService.GetCustomerByIdWithOrdersAsync(id);
-            if (orders == null)
-            {
-                return NotFound();
-            }
-            return Ok(orders);
-        }
     }
 }

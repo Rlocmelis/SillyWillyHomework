@@ -6,6 +6,5 @@ namespace SillyWillyHomework.Services
 {
     public interface ICustomersService : IBaseService<Customer, CustomerDto>
     {
-        Task<CustomerDto> GetCustomerByIdWithOrdersAsync(int customerId);
     }
 }

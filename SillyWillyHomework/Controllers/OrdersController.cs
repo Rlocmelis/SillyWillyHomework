@@ -25,33 +25,16 @@ namespace SillyWillyHomework.Controllers
             return Ok(order);
         }
 
+
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] OrderDto model)
+        public async Task<ActionResult<OrderDto>> PlaceOrder([FromBody] OrderRequestDto orderDto)
         {
-            if (model == null)
-            {
-                return BadRequest();
-            }
-            await _ordersService.AddAsync(model);
-            return CreatedAtAction(nameof(Get), new { id = model.Id }, model);
-        }
+            var order = await _ordersService.PrepareOrder(orderDto);
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> PutAsync(int id, [FromBody] OrderDto model)
-        {
-            if (model == null || id != model.Id)
-            {
-                return BadRequest();
-            }
-            await _ordersService.UpdateAsync(id, model);
-            return NoContent();
-        }
+            // Add the order to the database
+            var orderResult = await _ordersService.AddAsync(order);
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteAsync(int id)
-        {
-            await _ordersService.DeleteAsync(id);
-            return NoContent();
+            return CreatedAtAction(nameof(orderResult), new { id = orderResult.Id }, orderResult);
         }
     }
 }

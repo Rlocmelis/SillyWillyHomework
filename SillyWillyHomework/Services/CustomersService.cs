@@ -4,6 +4,7 @@ using SillyWillyHomework.Entities;
 using SillyWillyHomework.Models;
 using SillyWillyHomework.Repositories.BaseRepository;
 using SillyWillyHomework.Services.BaseService;
+using System.Linq.Expressions;
 
 namespace SillyWillyHomework.Services
 {
@@ -16,11 +17,5 @@ namespace SillyWillyHomework.Services
             _validator = validator;
         }
 
-        public async Task<CustomerDto> GetCustomerByIdWithOrdersAsync(int customerId)
-        {
-            var include = "Order";
-
-            return await GetByIdAsync(customerId, include);
-        }
     }
 }

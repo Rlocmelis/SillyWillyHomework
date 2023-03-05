@@ -4,8 +4,7 @@ using SillyWillyHomework.Services.BaseService;
 
 namespace SillyWillyHomework.Services
 {
-    public interface IOrdersService : IBaseService<Order, OrderDto>
+    public interface IProductsService : IBaseService<Product, ProductDto>
     {
-        Task<OrderDto> PrepareOrder(OrderRequestDto model);
     }
 }

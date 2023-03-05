@@ -5,6 +5,7 @@ using SillyWillyHomework.DbContexts;
 using SillyWillyHomework.Entities;
 using SillyWillyHomework.ErrorHandling;
 using SillyWillyHomework.Models;
+using SillyWillyHomework.Models.OrderRequests;
 using SillyWillyHomework.Repositories.BaseRepository;
 using SillyWillyHomework.Services;
 using SillyWillyHomework.Services.BaseService;
@@ -31,9 +32,11 @@ builder.Services.AddScoped(typeof(IBaseService<,>), typeof(BaseService<,>));
 
 // Register the services that implement the BaseService
 builder.Services.AddScoped<IOrdersService, OrdersService>();
+builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<ICustomersService, CustomersService>();
 
-builder.Services.AddScoped<IValidator<OrderDto>, OrderDtoValidator>();
+builder.Services.AddScoped<IValidator<OrderRequestDto>, OrderRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<OrderRequestItemDto>, OrderRequestItemDtoValidator>();
 builder.Services.AddScoped<IValidator<CustomerDto>, CustomerDtoValidator>();
 
 var app = builder.Build();
