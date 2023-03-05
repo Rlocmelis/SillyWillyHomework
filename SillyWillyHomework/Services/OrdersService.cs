@@ -31,21 +31,8 @@ namespace SillyWillyHomework.Services
 
             var amount = receivedOrder.Items.Sum(x => x.Quantity);
 
-            // Calculate the price and discount for the order
-            var basePrice = 98.99m;
 
-            var price = basePrice * amount;
-            var discount = 0.0m;
-            if (amount >= 10 && amount < 50)
-            {
-                discount = 0.05m;
-            }
-            else if (amount >= 50)
-            {
-                discount = 0.15m;
-            }
-            var discountAmount = Math.Round(price * discount, 2);
-            var totalPrice = Math.Round(price - discountAmount, 2);
+            var totalPrice = 0m;
 
             // Create the order entity
             var order = new OrderDto
@@ -58,6 +45,22 @@ namespace SillyWillyHomework.Services
             foreach(var item in receivedOrder.Items )
             {
                 await _itemValidator.ValidateAndThrowAsync(item);
+
+                // Calculate the price and discount for the order
+                var basePrice = 98.99m;
+
+                var price = basePrice * amount;
+                var discount = 0.0m;
+                if (amount >= 10 && amount < 50)
+                {
+                    discount = 0.05m;
+                }
+                else if (amount >= 50)
+                {
+                    discount = 0.15m;
+                }
+                var discountAmount = Math.Round(price * discount, 2);
+                totalPrice = Math.Round(price - discountAmount, 2);
 
                 var itemProduct = await _productsService.GetByIdAsync(item.ProductId);
 
