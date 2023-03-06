@@ -9,6 +9,7 @@ namespace SillyWillyHomework.Models
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
+        public CustomerDto Customer { get; set; }
         public DateTime ExpectedDeliveryDate { get; set; }
         public List<OrderItemDto> Items { get; set; }
         public decimal TotalPrice { get; set; }

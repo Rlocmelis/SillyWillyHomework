@@ -25,16 +25,26 @@ namespace SillyWillyHomework.Controllers
             return Ok(order);
         }
 
+        [HttpGet("customer/{id}")]
+        public async Task<ActionResult<List<OrderDto>>> GetCustomerOrders(int id)
+        {
+            var orders = await _ordersService.GetCustomerOrders(id);
+            if (orders == null)
+            {
+                return NotFound();
+            }
+            return Ok(orders);
+        }
 
         [HttpPost]
-        public async Task<ActionResult<OrderDto>> PlaceOrder([FromBody] OrderRequestDto orderDto)
+        public async Task<ActionResult<OrderDto>> PlaceOrder([FromBody] OrderRequest orderDto)
         {
             var order = await _ordersService.PrepareOrder(orderDto);
 
             // Add the order to the database
             var orderResult = await _ordersService.AddAsync(order);
 
-            return CreatedAtAction(nameof(orderResult), new { id = orderResult.Id }, orderResult);
+            return Ok(orderResult);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SillyWillyHomework.Entities;
 using SillyWillyHomework.Models;
+using SillyWillyHomework.Models.Requests;
 
 namespace SillyWillyHomework.Mapping
 {
@@ -9,6 +10,9 @@ namespace SillyWillyHomework.Mapping
         public CustomerProfile() 
         {
             CreateMap<Customer, CustomerDto>()
+                .ReverseMap();
+
+            CreateMap<CustomerDto, CustomerRequest>()
                 .ReverseMap();
         }
     }

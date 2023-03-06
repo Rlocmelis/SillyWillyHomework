@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using SillyWillyHomework.Business.Discounts;
 using SillyWillyHomework.Entities;
+using SillyWillyHomework.Exceptions;
 using SillyWillyHomework.Models;
-using SillyWillyHomework.Models.OrderRequests;
+using SillyWillyHomework.Models.Requests;
 using SillyWillyHomework.Repositories.BaseRepository;
 using SillyWillyHomework.Services.BaseService;
 
@@ -10,27 +12,41 @@ namespace SillyWillyHomework.Services
 {
     public class OrdersService : BaseService<Order, OrderDto>, IOrdersService
     {
+        private readonly IMapper _mapper;
+        private readonly IOrdersRepository _ordersRepository;
+        private readonly IBaseRepository<Customer> _customerRepository;
         private readonly IProductsService _productsService;
-        private readonly IValidator<OrderRequestDto> _validator;
-        private readonly IValidator<OrderRequestItemDto> _itemValidator;
+        private readonly IProductDiscountService _productDiscountService;
+        private readonly IValidator<OrderRequest> _validator;
+        private readonly IValidator<OrderItemRequest> _itemValidator;
 
-        public OrdersService(IBaseRepository<Order> repository, 
+        public OrdersService(IBaseRepository<Order> repository,
+            IBaseRepository<Customer> customerRepository,
+            IOrdersRepository ordersRepository,
             IMapper mapper, 
-            IProductsService productsService, 
-            IValidator<OrderRequestDto> validator,
-            IValidator<OrderRequestItemDto> itemValidator) : base(repository, mapper)
+            IProductsService productsService,
+            IProductDiscountService productDiscountService,
+            IValidator<OrderRequest> validator,
+            IValidator<OrderItemRequest> itemValidator) : base(repository, mapper)
         {
+            _ordersRepository = ordersRepository;
+            _customerRepository = customerRepository;
             _productsService = productsService;
+            _productDiscountService = productDiscountService;
             _validator = validator;
             _itemValidator = itemValidator;
+            _mapper = mapper;
         }
 
-        public async Task<OrderDto> PrepareOrder(OrderRequestDto receivedOrder)
+        public async Task<OrderDto> PrepareOrder(OrderRequest receivedOrder)
         {
             await _validator.ValidateAndThrowAsync(receivedOrder);
 
-            var amount = receivedOrder.Items.Sum(x => x.Quantity);
-
+            var customer = await _customerRepository.GetByIdAsync(receivedOrder.CustomerId);
+            if (customer == null)
+            {
+                throw new NotFoundException("Customer does not exist");
+            }
 
             var totalPrice = 0m;
 
@@ -39,40 +55,44 @@ namespace SillyWillyHomework.Services
             {
                 CustomerId = receivedOrder.CustomerId,
                 ExpectedDeliveryDate = receivedOrder.ExpectedDeliveryDate,
+                Items = new List<OrderItemDto>(),
                 TotalPrice = totalPrice
             };
 
-            foreach(var item in receivedOrder.Items )
+            // Validate, add received items to the order and calculate the total price
+            foreach(var item in receivedOrder.Items)
             {
                 await _itemValidator.ValidateAndThrowAsync(item);
 
-                // Calculate the price and discount for the order
-                var basePrice = 98.99m;
-
-                var price = basePrice * amount;
-                var discount = 0.0m;
-                if (amount >= 10 && amount < 50)
-                {
-                    discount = 0.05m;
-                }
-                else if (amount >= 50)
-                {
-                    discount = 0.15m;
-                }
-                var discountAmount = Math.Round(price * discount, 2);
-                totalPrice = Math.Round(price - discountAmount, 2);
-
                 var itemProduct = await _productsService.GetByIdAsync(item.ProductId);
+
+                totalPrice = _productDiscountService.CalculateTotalPrice(itemProduct.Price, item.Quantity) + totalPrice;
 
                 order.Items.Add(new OrderItemDto
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    Price = itemProduct.Price
+                    Price = itemProduct.Price,
                 });
             }
 
-            return await base.AddAsync(order);
+            order.TotalPrice = totalPrice;
+
+            return order;
+        }
+
+        public async Task<List<OrderDto>> GetCustomerOrders(int customerId)
+        {
+            var customer = await _customerRepository.GetByIdAsync(customerId);
+            if (customer == null)
+            {
+                throw new NotFoundException("Customer does not exist");
+            }
+
+            var model = await _ordersRepository.GetCustomerOrdersAsync(customerId);
+            var result = _mapper.Map<List<OrderDto>>(model);
+
+            return result;
         }
     }
 }

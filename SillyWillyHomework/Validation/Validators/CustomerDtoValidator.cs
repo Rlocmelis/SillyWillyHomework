@@ -7,7 +7,8 @@ namespace SillyWillyHomework.Validation.Validators
     {
         public CustomerDtoValidator()
         {
-        
+            RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.Name).MaximumLength(150);
         }
     }
 }

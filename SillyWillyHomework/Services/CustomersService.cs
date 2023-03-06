@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using SillyWillyHomework.Entities;
 using SillyWillyHomework.Models;
 using SillyWillyHomework.Repositories.BaseRepository;
@@ -17,5 +18,11 @@ namespace SillyWillyHomework.Services
             _validator = validator;
         }
 
+        public override async Task<CustomerDto> AddAsync(CustomerDto model)
+        {
+            await _validator.ValidateAsync(model);
+
+            return await base.AddAsync(model);
+        }
     }
 }

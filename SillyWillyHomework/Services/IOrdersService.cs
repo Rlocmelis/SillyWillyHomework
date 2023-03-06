@@ -6,6 +6,7 @@ namespace SillyWillyHomework.Services
 {
     public interface IOrdersService : IBaseService<Order, OrderDto>
     {
-        Task<OrderDto> PrepareOrder(OrderRequestDto model);
+        Task<OrderDto> PrepareOrder(OrderRequest model);
+        Task<List<OrderDto>> GetCustomerOrders(int customerId);
     }
 }

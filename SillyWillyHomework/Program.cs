@@ -1,11 +1,12 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using SillyWillyHomework.Business.Discounts;
 using SillyWillyHomework.DbContexts;
 using SillyWillyHomework.Entities;
 using SillyWillyHomework.ErrorHandling;
 using SillyWillyHomework.Models;
-using SillyWillyHomework.Models.OrderRequests;
+using SillyWillyHomework.Models.Requests;
 using SillyWillyHomework.Repositories.BaseRepository;
 using SillyWillyHomework.Services;
 using SillyWillyHomework.Services.BaseService;
@@ -37,14 +38,19 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IBaseService<,>), typeof(BaseService<,>));
 
+builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+
 // Register the services that implement the BaseService
 builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<ICustomersService, CustomersService>();
 
-builder.Services.AddScoped<IValidator<OrderRequestDto>, OrderRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<OrderRequestItemDto>, OrderRequestItemDtoValidator>();
+builder.Services.AddScoped<IValidator<OrderRequest>, OrderRequestDtoValidator>();
+builder.Services.AddScoped<IValidator<OrderItemRequest>, OrderRequestItemDtoValidator>();
 builder.Services.AddScoped<IValidator<CustomerDto>, CustomerDtoValidator>();
+
+builder.Services.AddScoped<IDiscountCalculator, DefaultDiscountCalculator>();
+builder.Services.AddScoped<IProductDiscountService, ProductDiscountService>();
 
 var app = builder.Build();
 

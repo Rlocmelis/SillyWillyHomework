@@ -10,18 +10,25 @@ namespace SillyWillyHomework.DbContexts
         {
         }
 
+        public DbSet<Customer> Customers { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
 
 
         public static void SeedData(ApplicationDbContext context)
         {
-            var myModels = new List<Product>
+            var myProducts = new List<Product>
             {
                 new Product(1, "DNA testing kit", 98.99m)
             };
 
-            context.Products.AddRange(myModels);
+            var myCustomers = new List<Customer>
+            {
+                new Customer(1, "Eglītes")
+            };
+
+            context.Products.AddRange(myProducts);
+            context.Customers.AddRange(myCustomers);
             context.SaveChanges();
         }
     }

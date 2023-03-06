@@ -10,6 +10,10 @@ namespace SillyWillyHomework.Mapping
         {
             CreateMap<Order, OrderDto>()
                 .ReverseMap();
+
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.UnitPrice))
+                .ReverseMap();
         }
     }
 }
