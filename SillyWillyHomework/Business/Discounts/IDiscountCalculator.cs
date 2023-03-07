@@ -2,6 +2,6 @@
 {
     public interface IDiscountCalculator
     {
-        decimal CalculateDiscount(decimal basePrice, int amount);
+        decimal CalculateDiscount(int amount);
     }
 }

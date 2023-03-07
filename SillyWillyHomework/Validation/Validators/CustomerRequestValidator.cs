@@ -3,9 +3,9 @@ using SillyWillyHomework.Models;
 
 namespace SillyWillyHomework.Validation.Validators
 {
-    public class CustomerDtoValidator : AbstractValidator<CustomerDto>
+    public class CustomerRequestValidator : AbstractValidator<CustomerDto>
     {
-        public CustomerDtoValidator()
+        public CustomerRequestValidator()
         {
             RuleFor(x => x.Name).NotEmpty();
             RuleFor(x => x.Name).MaximumLength(150);

@@ -12,7 +12,7 @@
         public decimal CalculateTotalPrice(decimal basePrice, int amount)
         {
             decimal price = basePrice * amount;
-            decimal discount = discountCalculator.CalculateDiscount(basePrice, amount);
+            decimal discount = discountCalculator.CalculateDiscount(amount);
             decimal discountAmount = Math.Round(price * discount, 2);
             decimal totalPrice = Math.Round(price - discountAmount, 2);
             return totalPrice;

@@ -51,9 +51,9 @@ builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<ICustomersService, CustomersService>();
 
-builder.Services.AddScoped<IValidator<OrderRequest>, OrderRequestDtoValidator>();
-builder.Services.AddScoped<IValidator<OrderItemRequest>, OrderRequestItemDtoValidator>();
-builder.Services.AddScoped<IValidator<CustomerDto>, CustomerDtoValidator>();
+builder.Services.AddScoped<IValidator<OrderRequest>, OrderRequestValidator>();
+builder.Services.AddScoped<IValidator<OrderItemRequest>, OrderItemRequestValidator>();
+builder.Services.AddScoped<IValidator<CustomerDto>, CustomerRequestValidator>();
 
 builder.Services.AddScoped<IDiscountCalculator, DefaultDiscountCalculator>();
 builder.Services.AddScoped<IProductDiscountService, ProductDiscountService>();

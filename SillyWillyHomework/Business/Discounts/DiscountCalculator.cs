@@ -3,7 +3,7 @@
 
     public class DefaultDiscountCalculator : IDiscountCalculator
     {
-        public decimal CalculateDiscount(decimal basePrice, int amount)
+        public decimal CalculateDiscount(int amount)
         {
             decimal discount = 0.0m;
             if (amount >= 10 && amount < 50)
