@@ -29,7 +29,12 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
-    ApplicationDbContext.SeedData(context);
+
+    bool dataBaseCreated = context.Database.EnsureCreated();
+    if (!dataBaseCreated)
+    {
+        ApplicationDbContext.SeedData(context);
+    }
 }
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -39,6 +44,7 @@ builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped(typeof(IBaseService<,>), typeof(BaseService<,>));
 
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+builder.Services.AddScoped(typeof(IBaseRepository<Customer>), typeof(BaseRepository<Customer>));
 
 // Register the services that implement the BaseService
 builder.Services.AddScoped<IOrdersService, OrdersService>();
@@ -70,3 +76,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Added so integration tests can access the Program.cs
+public partial class Program { }

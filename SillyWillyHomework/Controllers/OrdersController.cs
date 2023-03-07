@@ -37,9 +37,9 @@ namespace SillyWillyHomework.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<OrderDto>> PlaceOrder([FromBody] OrderRequest orderDto)
+        public async Task<ActionResult<OrderDto>> PlaceOrder([FromBody] OrderRequest orderRequest)
         {
-            var order = await _ordersService.PrepareOrder(orderDto);
+            var order = await _ordersService.PrepareOrder(orderRequest);
 
             // Add the order to the database
             var orderResult = await _ordersService.AddAsync(order);

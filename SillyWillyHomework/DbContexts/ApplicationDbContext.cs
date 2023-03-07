@@ -24,7 +24,7 @@ namespace SillyWillyHomework.DbContexts
 
             var myCustomers = new List<Customer>
             {
-                new Customer(1, "Eglītes")
+                new Customer("Eglītes")
             };
 
             context.Products.AddRange(myProducts);
