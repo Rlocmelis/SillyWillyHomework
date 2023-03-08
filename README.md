@@ -1,6 +1,7 @@
 # SillyWillyHomework O.O
 
 # The Task was implemented using an InMemory database so there's no extra steps needed to run
+# The Project was created using .Net 7
 
 ## Challenge
 
