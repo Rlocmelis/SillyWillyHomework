@@ -1,6 +1,6 @@
 # SillyWillyHomework O.O
 
-# The Task was implemented using an InMemory database so the setup is easy to do
+# The Task was implemented using an InMemory database so there's no extra steps needed to run
 
 ## Challenge
 
