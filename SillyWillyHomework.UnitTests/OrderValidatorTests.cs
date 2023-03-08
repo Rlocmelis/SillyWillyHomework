@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using SillyWillyHomework.Business.Discounts;
+using SillyWillyHomework.Entities;
 using SillyWillyHomework.Models;
 using SillyWillyHomework.Models.Requests;
 using SillyWillyHomework.Validation.Validators;
@@ -16,86 +17,200 @@ namespace SillyWillyHomework.UnitTests
 {
     public class OrderValidatorTests
     {
-        private Mock<OrderRequestValidator> orderRequestValidator;
-        private Mock<OrderItemRequestValidator> orderRequestItemValidator;
+        private readonly OrderRequestValidator _validator;
 
         public OrderValidatorTests()
         {
-            orderRequestValidator = new Mock<OrderRequestValidator>();
-            orderRequestItemValidator = new Mock<OrderItemRequestValidator>();
+            _validator = new OrderRequestValidator();
         }
 
         [Fact]
-        public void ValidateOrderRequestDto_ShouldBeInvalid_WhenDeliveryDateNotInFuture()
+        public void Validate_ShouldBeInvalid_WhenCustomerIdIsZero()
         {
             // Arrange
-            var orderRequestValidator = InitializeOrderRequestValidator();
-            var orderRequest = InitializeOrderRequestData(DateTime.Now.Date.AddDays(-1));
-
-            var result = orderRequestValidator.Validate(orderRequest);
-
-            result.IsValid.Should().BeFalse();
-        }
-
-
-        [Fact]
-        public void ValidateOrderRequestDto_ShouldBeValid_WhenDeliveryDateNotInFuture()
-        {
-            // Arrange
-            var orderRequestValidator = InitializeOrderRequestValidator();
-            var orderRequest = InitializeOrderRequestData(DateTime.Now.Date.AddDays(1));
-
-            var result = orderRequestValidator.Validate(orderRequest);
-
-            result.IsValid.Should().BeTrue();
-        }
-
-
-        #region
-        private OrderRequestValidator InitializeOrderRequestValidator()
-        {
-            orderRequestValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<OrderRequest>>()))
-                            .Returns(new ValidationResult());
-
-            var initializedOrderRequestValidator = orderRequestValidator.Object;
-
-            return initializedOrderRequestValidator;
-        }
-
-        private OrderItemRequestValidator InitializeOrderRequestItemValidator()
-        {
-            orderRequestItemValidator.Setup(v => v.Validate(It.IsAny<ValidationContext<OrderItemRequest>>()))
-                            .Returns(new ValidationResult());
-
-            var initializedOrderRequestItemValidator = orderRequestItemValidator.Object;
-
-            return initializedOrderRequestItemValidator;
-        }
-
-        private static OrderRequest InitializeOrderRequestData(DateTime expectedDeliveryDate)
-        {
-            var orderRequest = new OrderRequest
+            var order = new OrderRequest
             {
-                CustomerId = 1,
-                ExpectedDeliveryDate = expectedDeliveryDate,
+                CustomerId = 0,
+                ExpectedDeliveryDate = DateTime.Today.AddDays(1),
                 Items = new List<OrderItemRequest>
                 {
                     new OrderItemRequest
                     {
-                        ProductId = 100,
-                        Quantity = 2
-                    },
-                    new OrderItemRequest
-                    {
-                        ProductId = 200,
+                        ProductId = 1,
                         Quantity = 1
                     }
                 }
             };
 
-            return orderRequest;
+            // Act
+            var result = _validator.Validate(order);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().ContainSingle();
+            result.Errors.Should().Contain(x => x.PropertyName == nameof(OrderRequest.CustomerId));
         }
 
-        #endregion
+        [Fact]
+        public void Validate_ShouldBeInvalid_WhenExpectedDeliveryDateIsToday()
+        {
+            // Arrange
+            var order = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Today,
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(order);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().ContainSingle();
+            result.Errors.Should().Contain(x => x.ErrorMessage.Contains("greater than"));
+        }
+
+        [Fact]
+        public void Validate_ShouldBeInvalid_WhenExpectedDeliveryDateIsYesterday()
+        {
+            // Arrange
+            var order = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Today.AddDays(-1),
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(order);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().ContainSingle();
+            result.Errors.Should().Contain(x => x.ErrorMessage.Contains("greater than"));
+        }
+
+        [Fact]
+        public void Validate_ShouldBeInvalid_WhenOrderRequestHasMoreThanOneItem()
+        {
+            // Arrange
+            var orderRequest = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Now.Date.AddDays(1),
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 1
+                    },
+                    new OrderItemRequest
+                    {
+                        ProductId = 2,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(orderRequest);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().Contain(x => x.ErrorMessage == "Currently, only 1 item is allowed per order.");
+        }
+
+        [Fact]
+        public void Validate_ShouldBeInvalid_WhenOrderRequestHasInvalidProductId()
+        {
+            // Arrange
+            var orderRequest = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Now.Date.AddDays(1),
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 2,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(orderRequest);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().Contain(x => x.ErrorMessage == "Currently, only orders for DNA testing kits are allowed.");
+        }
+
+        [Fact]
+        public void Validate_ShouldBeInvalid_WhenOrderRequestHasInvalidProductQuantity()
+        {
+            // Arrange
+            var orderRequest = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Now.Date.AddDays(1),
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 1000
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(orderRequest);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.Errors.Should().Contain(x => x.ErrorMessage.Contains("must be less than"));
+        }
+
+        [Fact]
+        public void Validate_ShouldBeValid_WhenOrderRequestIsValid()
+        {
+            // Arrange
+            var orderRequest = new OrderRequest
+            {
+                CustomerId = 1,
+                ExpectedDeliveryDate = DateTime.Now.Date.AddDays(1),
+                Items = new List<OrderItemRequest>
+                {
+                    new OrderItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            // Act
+            var result = _validator.Validate(orderRequest);
+
+            // Assert
+            result.IsValid.Should().BeTrue();
+        }
     }
 }

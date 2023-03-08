@@ -17,6 +17,12 @@ namespace SillyWillyHomework.DbContexts
 
         public static void SeedData(ApplicationDbContext context)
         {
+            if (context.Products.Any() || context.Customers.Any())
+            {
+                // Data has already been seeded
+                return;
+            }
+
             var myProducts = new List<Product>
             {
                 new Product(1, "DNA testing kit", 98.99m)

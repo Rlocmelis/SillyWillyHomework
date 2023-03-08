@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using SillyWillyHomework.DbContexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: TestCaseOrderer("SillyWillyHomework.IntegrationTests.Core.CustomTestCaseOrderer", "SillyWillyHomework.IntegrationTests")]
 namespace SillyWillyHomework.IntegrationTests.Core
 {
     public class BaseTest : IClassFixture<IntegrationTestAppFactory<Program>>, IDisposable
@@ -26,5 +29,4 @@ namespace SillyWillyHomework.IntegrationTests.Core
             _scope.Dispose();
         }
     }
-
 }

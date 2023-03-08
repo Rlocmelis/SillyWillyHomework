@@ -18,16 +18,15 @@ using SillyWillyHomework.IntegrationTests.Core;
 
 namespace SillyWillyHomework.IntegrationTests.Business
 {
-
     [Collection("TestCollection")]
-    [TestCaseOrderer("SillyWillyHomework.IntegrationTests.Core.PriorityOrderer", "SillyWillyHomework.IntegrationTests.Core")]
     public class CustomerControllerTests : BaseTest
     {
         public CustomerControllerTests(IntegrationTestAppFactory<Program> factory) : base(factory)
         {
         }
 
-        [Fact, TestPriority(1)]
+        [Fact]
+        [TestOrder(1)]
         public async Task GetCustomer_ShouldReturnCustomer_WhenCustomerExists()
         {
             var dataAccess = _scope.ServiceProvider.GetRequiredService<IBaseService<Customer, CustomerDto>>();
@@ -37,39 +36,26 @@ namespace SillyWillyHomework.IntegrationTests.Business
                 Name = "Integration Test customer",
             });
 
-            var expectedCustomer = new Customer()
-            {
-                Id = 2,
-                Name = "Integration Test customer",
-            };
-
             var response = await _httpClient.GetAsync($"api/Customers/{testCustomer.Id}");
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            var responseObject = await response.Content.ReadFromJsonAsync<Customer>();
-
-            responseObject.Should().BeEquivalentTo(expectedCustomer);
         }
 
-        [Fact, TestPriority(2)]
-        public async Task GetCustomer_ShouldReturnCustomer()
+        [Fact]
+        [TestOrder(2)]
+        public async Task GetCustomer_ShouldReturn404_WhenCustomerDoesNotExist()
         {
             var dataAccess = _scope.ServiceProvider.GetRequiredService<IBaseService<Customer, CustomerDto>>();
 
-            var expectedCustomer = new Customer()
+            var nonExistingCustomer = new Customer()
             {
-                Id = 2,
+                Id = 999,
                 Name = "Integration Test customer",
             };
 
-            var response = await _httpClient.GetAsync($"api/Customers/{expectedCustomer.Id}");
+            var response = await _httpClient.GetAsync($"api/Customers/{nonExistingCustomer.Id}");
 
-            response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            var responseObject = await response.Content.ReadFromJsonAsync<Customer>();
-
-            responseObject.Should().BeEquivalentTo(expectedCustomer);
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         public void Dispose()

@@ -30,11 +30,7 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
 
-    bool dataBaseCreated = context.Database.EnsureCreated();
-    if (!dataBaseCreated)
-    {
-        ApplicationDbContext.SeedData(context);
-    }
+    ApplicationDbContext.SeedData(context);
 }
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);

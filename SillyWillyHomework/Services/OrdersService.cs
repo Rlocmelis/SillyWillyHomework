@@ -18,7 +18,6 @@ namespace SillyWillyHomework.Services
         private readonly IProductsService _productsService;
         private readonly IProductDiscountService _productDiscountService;
         private readonly IValidator<OrderRequest> _validator;
-        private readonly IValidator<OrderItemRequest> _itemValidator;
 
         public OrdersService(IBaseRepository<Order> repository,
             IBaseRepository<Customer> customerRepository,
@@ -26,15 +25,13 @@ namespace SillyWillyHomework.Services
             IMapper mapper, 
             IProductsService productsService,
             IProductDiscountService productDiscountService,
-            IValidator<OrderRequest> validator,
-            IValidator<OrderItemRequest> itemValidator) : base(repository, mapper)
+            IValidator<OrderRequest> validator) : base(repository, mapper)
         {
             _ordersRepository = ordersRepository;
             _customerRepository = customerRepository;
             _productsService = productsService;
             _productDiscountService = productDiscountService;
             _validator = validator;
-            _itemValidator = itemValidator;
             _mapper = mapper;
         }
 
@@ -62,9 +59,12 @@ namespace SillyWillyHomework.Services
             // Validate, add received items to the order and calculate the total price
             foreach(var item in receivedOrder.Items)
             {
-                await _itemValidator.ValidateAndThrowAsync(item);
-
                 var itemProduct = await _productsService.GetByIdAsync(item.ProductId);
+
+                if (itemProduct == null)
+                {
+                    throw new NotFoundException("Product does not exist.");
+                }
 
                 totalPrice = _productDiscountService.CalculateTotalPrice(itemProduct.Price, item.Quantity) + totalPrice;
 

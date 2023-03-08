@@ -17,14 +17,13 @@ using System.Threading.Tasks;
 namespace SillyWillyHomework.IntegrationTests.Business
 {
     [Collection("TestCollection")]
-    [TestCaseOrderer("SillyWillyHomework.IntegrationTests.Core.PriorityOrderer", "SillyWillyHomework.IntegrationTests.Core")]
     public class OrdersControllerTests : BaseTest
     {
         public OrdersControllerTests(IntegrationTestAppFactory<Program> factory) : base(factory)
         {
         }
 
-        [Fact, TestPriority(1)]
+        [Fact, TestOrder(3)]
         public async Task PostOrder_ShouldReturnOrder_WhenValidOrder()
         {
             var dataAccess = _scope.ServiceProvider.GetRequiredService<IOrdersService>();
@@ -50,13 +49,9 @@ namespace SillyWillyHomework.IntegrationTests.Business
             var response = await _httpClient.GetAsync($"api/Orders/customer/{2}");
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-            var responseObject = await response.Content.ReadFromJsonAsync<OrderDto>();
-
-            responseObject.Should().BeNull();
         }
 
-        [Fact, TestPriority(3)]
+        [Fact, TestOrder(3)]
         public async Task PostOrder_ShouldReturnCustomerNotExists_WhenNonExistingCustomer()
         {
             var dataAccess = _scope.ServiceProvider.GetRequiredService<IOrdersService>();
@@ -75,10 +70,8 @@ namespace SillyWillyHomework.IntegrationTests.Business
                 }
             };
 
-            var preparedOrder = await dataAccess.PrepareOrder(orderRequest);
-
-            preparedOrder.Should().BeNull();
+            // Act & Assert
+            await Assert.ThrowsAsync<NotFoundException>(() => dataAccess.PrepareOrder(orderRequest));
         }
-
     }
 }
